@@ -22,8 +22,9 @@ Limitations:
 
 The list of possible DoH servers is contained within the file `dohservers`. Use `#` for comments. 
 
-DNSCP supports a basic `hosts` file like Linux and Windows, with the classic format of [ip]<space>[domain] and comments preceded by `#`, e.g.:
+DNSCP supports a basic `hosts` file like Linux and Windows, with the classic format of [ip][space(s)][domain] and comments preceded by `#`, e.g.:
 
+    # I want somerandomexampledomain.com to point to my local server
     192.168.1.100 somerandomexampledomain.com
     
 ## Usage
