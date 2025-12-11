@@ -1,0 +1,10 @@
+# List of DoH servers. Every entry should use HTTP2 (h2) 
+h2://dns10.quad9.net/dns-query
+h2://cloudflare-dns.com/dns-query
+h2://anycast.uncensoreddns.org/dns-query
+h2://dns.sb/dns-query
+h2://freedns.controld.com/p0
+h2://dns.mullvad.net/dns-query
+h2://doh.libredns.gr/dns-query
+h2://unfiltered.joindns4.eu/dns-query
+h2://dns.digitale-gesellschaft.ch/dns-query
