@@ -23,6 +23,7 @@ Limitations:
 The list of possible DoH servers is contained within the file `dohservers`. Use `#` for comments. 
 
 DNSCP supports a basic `hosts` file like Linux and Windows, with the classic format of [ip]<space>[domain] and comments preceded by `#`, e.g.:
+
     192.168.1.100 somerandomexampledomain.com
     
 ## Usage
@@ -30,9 +31,13 @@ Run `npm install` followed by `node index.js`. The `hosts` file and `dohservers`
 
 ### Example: Using a Raspberry PI with Raspberry PI OS as a local network DNS server using DNSCP
 Using DoH requires a regular DNS server to look up the DoH domain. A simple way to ensure that this is possible, is to configure which DNS server the Raspberry PI should use:
+
     sudo nano /etc/systemd/resolved.conf
+    
 Add the following line:
+
     static domain_name_servers=194.242.2.2 86.54.11.100
+    
 This example points to Mullvad and DNS4EU DNS servers, but you can use whichever DNS servers you prefer.
 
 Afterwards you can start the DNSCP server and configure your router to use it. You can use for instance PM2 to ensure that DNSCP starts automatically during start up.
