@@ -16,29 +16,17 @@ Limitations:
 `index.js` contains the following default settings, which you can change as you see fit:
 * **numberOfServersToAsk**: How many external DNS servers should be asked for each query (default 4)
 * **minimumForConsensus**: How many external DNS servers must agree on the answer to a query to establish consensus (default 2)
-* **serverTimeout**: How many ms to wait for an external DNS server to reply (default 2000)
 * **cacheLimit**: How many DNS query results should be cached (default 5000)
 * **cacheTTL**: How many seconds is a cached DNS query valid (default 600)
 
-The list of possible DoH servers is contained within the file `dohservers`. Use `#` for comments. 
+The list of possible DoH servers is contained within the file `dohservers`. Use `#` for comments.
 
 DNSCP supports a basic `hosts` file like Linux and Windows, with the classic format of [ip][space(s)][domain] and comments preceded by `#`, e.g.:
 
     # I want somerandomexampledomain.com to point to my local server
     192.168.1.100 somerandomexampledomain.com
-    
+
+DoH requires the ability to look up the DoH server hostname. If DNSCP is configured as the DHCP name server (typical for LAN use), there is a good chance that the node will try to look up the DoH server hostnames using itself - which will obviously not work. To avoid this problem, the first line in `index.js` is monkey patching node's `dns.lookup()` method to resolve the DoH servers using CloudFlare 1.1.1.1 or Google 8.8.8.8. If you do not wish behaviour, remove or comment out the line `require('./patch-dns-for-doh-server-lookup');`.
+
 ## Usage
 Run `npm install` followed by `node index.js`. The `hosts` file and `dohservers` file are read once during start - restart DNSCP for any changes to the files to take effect.
-
-### Example: Using a Raspberry PI with Raspberry PI OS as a local network DNS server using DNSCP
-Using DoH requires a regular DNS server to look up the DoH domain. A simple way to ensure that this is possible, is to configure which DNS server the Raspberry PI should use:
-
-    sudo nano /etc/systemd/resolved.conf
-    
-Add the following line:
-
-    static domain_name_servers=194.242.2.2 86.54.11.100
-    
-This example points to Mullvad and DNS4EU DNS servers, but you can use whichever DNS servers you prefer.
-
-Afterwards you can start the DNSCP server and configure your router to use it. You can use for instance PM2 to ensure that DNSCP starts automatically during start up.

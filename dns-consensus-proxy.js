@@ -6,7 +6,6 @@ class DNSConsensusProxy {
     constructor(settings) {
         this.numberOfServersToAsk = settings.numberOfServersToAsk || 4;
         this.minimumForConsensus = settings.minimumForConsensus || 2;
-        this.serverTimeout = settings.serverTimeout || 2000;
         this.cacheLimit = settings.cacheLimit || 2000;
         this.cacheTTL = settings.cacheTTL || 600;
 
@@ -21,12 +20,12 @@ class DNSConsensusProxy {
     }
 
     makeAnswersKey(a) {
-        if(a && a.length) {
+        if (a && a.length) {
             // There are answers, sort them to ensure that the same key is made for the same list of answers
             const addresses = a.map(a => a.address);
             addresses.sort((a,b) => {
-                if(a > b) return 1;
-                if(a < b) return -1;
+                if (a > b) return 1;
+                if (a < b) return -1;
                 return 0;
             });
             return addresses.join('|');
@@ -38,10 +37,10 @@ class DNSConsensusProxy {
         // No validation, your files better be good!
         // Read hosts file
         try{
-            if(fs.existsSync('./hosts')) {
+            if (fs.existsSync('./hosts')) {
                 const hostsFile = await open('./hosts');
                 for await (const line of hostsFile.readLines()) {
-                    if(line.trim().charAt(0) !== '#') {
+                    if (line && line.trim().charAt(0) !== '#') {
                         const parts = line.split(' ').map(l => l.trim()).filter(l => l);
                         this.hosts[parts[1]] = parts[0];
                     }
@@ -51,19 +50,18 @@ class DNSConsensusProxy {
             console.warn('hosts file could not be parsed: ', err);
         }
         // Read dohservers file
-        try{
-            if(fs.existsSync('./dohservers')) {
+        try {
+            if (fs.existsSync('./dohservers')) {
                 const dohservers = await open('./dohservers');
-                for await (const line of dohservers.readLines()) {
-                    const trimmedLine = line.trim();
-                    if(trimmedLine.charAt(0) !== '#') {
-                        this.DoHAddresses.push(trimmedLine);
+                for await (let line of dohservers.readLines()) {
+                    line = line.trim();
+                    if (line && line.charAt(0) !== '#') {
+                        this.DoHAddresses.push(line);
                     }
                 }
                 this.DoHClients.push(...this.DoHAddresses.map(address => {
                     return DOHClient({
-                        dns: address,
-                        timeout: this.serverTimeout,
+                        dns: address
                     });
                 }));
             } else {
@@ -77,13 +75,13 @@ class DNSConsensusProxy {
     }
 
     sendResult(send, request, result, cacheKey = null) {
-        if(cacheKey) {
+        if (cacheKey) {
             this.cache.push({
                 key: cacheKey,
                 result: result,
                 time: new Date().getTime()
             });
-            while(this.cache.length > this.cacheLimit) {
+            while (this.cache.length > this.cacheLimit) {
                 this.cache.shift();
             }
         }
@@ -98,11 +96,11 @@ class DNSConsensusProxy {
     }
 
     checkForConsensus(queryResult, send, request, cacheKey) {
-        if(queryResult.consensus) return;
-        if(queryResult.results.length >= this.minimumForConsensus) {
+        if (queryResult.consensus) return;
+        if (queryResult.results.length >= this.minimumForConsensus) {
             const answersMap = {};
             queryResult.results.forEach(result => {
-                if(result) {
+                if (result) {
                     const key = this.makeAnswersKey(result.answers);
                     answersMap[key] = (answersMap[key] ?? 0) + 1;
                     result.key = key;
@@ -110,7 +108,7 @@ class DNSConsensusProxy {
             });
 
             const consensusKey = Object.keys(answersMap).find(key => answersMap[key] >= this.minimumForConsensus);
-            if(consensusKey) {
+            if (consensusKey) {
                 // Consensus established, send the result and save it in cache
                 queryResult.consensus = true;
                 const result = queryResult.results.find(qr => qr?.key === consensusKey);
@@ -119,7 +117,7 @@ class DNSConsensusProxy {
             } else if (queryResult.results.length === this.numberOfServersToAsk) {
                 // No consensus after all results are in
                 const filteredResults = queryResult.results.filter(r => r); // Remove null values
-                if(filteredResults.length) {
+                if (filteredResults.length) {
                     // There is one or more result, send the first one
                     delete filteredResults[0].key;
                     this.sendResult(send, request, filteredResults[0]);
@@ -141,7 +139,7 @@ class DNSConsensusProxy {
             results: []
         };
 
-        if(![Packet.TYPE.A, Packet.TYPE.AAAA].includes(question.type) || question.class !== Packet.CLASS.IN) {
+        if (![Packet.TYPE.A, Packet.TYPE.AAAA].includes(question.type) || question.class !== Packet.CLASS.IN) {
             // The DNS query is not supported by the consensus implementation, just behave as a basic proxy and ask a random DNS server
             this.DoHClients[Math.floor(Math.random() * this.DoHClients.length)](question.name, questionType, question.class)
                 .then(result => {
@@ -154,7 +152,7 @@ class DNSConsensusProxy {
                 });
         } else {
             // First check against hosts
-            if(this.hosts[question.name]) {
+            if (this.hosts[question.name]) {
                 const response = Packet.createResponseFromRequest(request);
                 const { name } = question.name;
                 response.answers.push({
@@ -175,7 +173,7 @@ class DNSConsensusProxy {
             const cacheKey = this.makeCacheKey(question);
             const cached = this.cache.find(cacheElement => cacheElement.key === cacheKey);
 
-            if(cached && cached.time + (this.cacheTTL*1000) > new Date().getTime()) {
+            if (cached && cached.time + (this.cacheTTL*1000) > new Date().getTime()) {
                 // There is a cached result and it is not too old
                 this.sendResult(send, request, cached.result);
             } else {
