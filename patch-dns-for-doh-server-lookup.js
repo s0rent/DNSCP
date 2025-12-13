@@ -20,16 +20,15 @@ dns.lookup = (hostname, options, callback) => {
     if (DoHServerHostNames.includes(hostname)) {
         customDnsResolver.resolve4(hostname, (err, addresses) => {
             if (err || addresses.length === 0) {
-                return callback(err);
+                callback(err);
             }
             if (options?.all === true) {
                 const results = addresses.map(addr => ({ address: addr, family: 4 }));
-                return callback(null, results); 
+                callback(null, results); 
                 
             } else {
-                return callback(null, addresses[0], 4); 
+                callback(null, addresses[0], 4); 
             }
-            callback(null, options?.all ? addresses : addresses[0], 4);
         });
     } else {
         return originalDnsLookupMethod(hostname, options, callback);
