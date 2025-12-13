@@ -9,8 +9,7 @@ Features:
 * Hosts file support
 
 Limitations:
-* Consensus is only supported for A and AAAA records. 
-*Other query types, such as MX, will be forwarded the response from a random DoH server*
+* Consensus is only supported for A and AAAA records. Other query types, such as MX, will be forwarded a response from a random DoH server.
 
 ## Configuration
 `index.js` contains the following default settings, which you can change as you see fit:
