@@ -39,8 +39,9 @@ class DNSConsensusProxy {
         try{
             if (fs.existsSync('./hosts')) {
                 const hostsFile = await open('./hosts');
-                for await (const line of hostsFile.readLines()) {
-                    if (line && line.trim().charAt(0) !== '#') {
+                for await (let line of hostsFile.readLines()) {
+                    line = line.trim();
+                    if (line && line.charAt(0) !== '#') {
                         const parts = line.split(' ').map(l => l.trim()).filter(l => l);
                         this.hosts[parts[1]] = parts[0];
                     }
