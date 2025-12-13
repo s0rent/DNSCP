@@ -26,7 +26,7 @@ DNSCP supports a basic `hosts` file like Linux and Windows, with the classic for
     # I want somerandomexampledomain.com to point to my local server
     192.168.1.100 somerandomexampledomain.com
 
-DoH requires the ability to look up the DoH server hostname. If DNSCP is configured as the DHCP name server (typical for LAN use), there is a good chance that the node will try to look up the DoH server hostnames using itself - which will obviously not work. To avoid this problem, the first line in `index.js` is monkey patching node's `dns.lookup()` method to resolve the DoH servers using CloudFlare 1.1.1.1 or Google 8.8.8.8. If you do not wish behaviour, remove or comment out the line `require('./patch-dns-for-doh-server-lookup');`.
+DoH requires the ability to look up the DoH server hostname. If DNSCP is configured as the DHCP name server (typical for LAN use), there is a good chance that node will try to look up the DoH server hostnames using itself - which will obviously not work. To avoid this problem, the first line in `index.js` is monkey patching node's `dns.lookup()` method to resolve the DoH servers using CloudFlare 1.1.1.1 or Google 8.8.8.8. If you do not wish behaviour, remove or comment out the line `require('./patch-dns-for-doh-server-lookup');`.
 
 ## Usage
 Run `npm install` followed by `node index.js`. The `hosts` file and `dohservers` file are read once during start - restart DNSCP for any changes to the files to take effect.
